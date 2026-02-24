@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="Criée"/>
+  <meta name="theme-color" content="#070c12"/>
+  <link rel="manifest" href="manifest.json"/>
+  <link rel="apple-touch-icon" href="icon.png"/>
+  <title>Coût Criée</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Cormorant+Garamond:wght@700&display=swap');
+
+    :root {
+      --bg: #070c12;
+      --bg2: #0a1520;
+      --bg3: #07101a;
+      --border: #142030;
+      --border2: #0d1b28;
+      --text: #b8ccd8;
+      --text2: #3a6888;
+      --accent: #5dc8f5;
+      --green: #3a9868;
+      --orange: #c07828;
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bot: env(safe-area-inset-bottom, 0px);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      min-height: 100vh;
+      min-height: -webkit-fill-available;
+      overflow-x: hidden;
+    }
+
+    /* LAYOUT */
+    #app { display: flex; flex-direction: column; height: 100vh; height: -webkit-fill-available; }
+
+    /* HEADER */
+    .header {
+      background: linear-gradient(180deg, #09141e, #070c12);
+      border-bottom: 1px solid #0f1e2e;
+      padding: calc(var(--safe-top) + 14px) 16px 12px;
+      flex-shrink: 0;
+    }
+    .header h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 20px;
+      color: var(--accent);
+      line-height: 1.2;
+    }
+    .header .sub { font-size: 9px; color: #1e4060; letter-spacing: .18em; text-transform: uppercase; margin-top: 2px; }
+    .header .pills { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+    .pill { background: var(--bg2); border: 1px solid var(--border); border-radius: 6px; padding: 6px 12px; }
+    .pill-label { font-size: 8px; color: #1e4060; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 2px; }
+    .pill-value { font-size: 13px; font-weight: 500; }
+
+    /* TABS */
+    .tabs {
+      display: flex; gap: 2px; padding: 8px 12px 0;
+      border-bottom: 1px solid #0d1a26;
+      flex-shrink: 0; overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab-btn {
+      white-space: nowrap; padding: 7px 14px; background: none;
+      border: 1px solid transparent; border-radius: 4px;
+      font-family: 'DM Mono', monospace; font-size: 9px;
+      letter-spacing: .12em; text-transform: uppercase;
+      color: #2e5878; cursor: pointer; transition: .2s; flex-shrink: 0;
+    }
+    .tab-btn.active { border-color: #1a5a8a; color: var(--accent); background: rgba(29,90,138,.13); }
+
+    /* CONTENT */
+    .content { flex: 1; overflow-y: auto; padding: 16px; padding-bottom: calc(var(--safe-bot) + 16px); }
+
+    /* CARDS */
+    .card { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; }
+    .card-pad { padding: 14px 16px; }
+    .section-label {
+      font-size: 9px; color: var(--text2); letter-spacing: .18em;
+      text-transform: uppercase; margin-bottom: 12px;
+    }
+
+    /* TABLE */
+    .tbl { width: 100%; border-collapse: collapse; }
+    .tbl thead tr { background: var(--bg3); border-bottom: 1px solid var(--border); }
+    .tbl th { padding: 8px 10px; font-size: 9px; color: var(--text2); font-weight: 400; letter-spacing: .1em; text-transform: uppercase; }
+    .tbl th.r, .tbl td.r { text-align: right; }
+    .tbl th.l, .tbl td.l { text-align: left; }
+    .tbl tbody tr { border-bottom: 1px solid var(--border2); }
+    .tbl tbody tr:active { background: rgba(15,55,85,.15); }
+    .tbl td { padding: 9px 10px; font-size: 12px; vertical-align: middle; }
+    .tbl tfoot tr { background: #08121e; border-top: 1px solid var(--border); }
+    .tbl tfoot td { padding: 9px 10px; font-size: 12px; }
+
+    /* INPUTS */
+    .inp {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 6px; color: var(--text);
+      font-family: 'DM Mono', monospace; font-size: 13px;
+      padding: 8px 10px; outline: none; width: 100%;
+    }
+    .inp:focus { border-color: #2a5a8a; }
+    input[type=number]::-webkit-inner-spin-button { opacity: .2; }
+
+    /* BUTTONS */
+    .btn-primary {
+      background: rgba(18,70,120,.2); border: 1px solid #1a5a8a;
+      color: var(--accent); padding: 10px 18px; border-radius: 6px;
+      font-family: 'DM Mono', monospace; font-size: 10px;
+      letter-spacing: .12em; text-transform: uppercase; cursor: pointer;
+    }
+    .btn-primary:active { background: rgba(18,70,120,.4); }
+    .btn-del { background: none; border: none; color: #2a1a1a; font-size: 20px; cursor: pointer; padding: 0 6px; }
+    .btn-del:active { color: #c84040; }
+
+    /* TOGGLE */
+    .toggle {
+      width: 36px; height: 20px; border-radius: 10px; cursor: pointer;
+      position: relative; flex-shrink: 0; transition: .2s;
+    }
+    .toggle-knob {
+      position: absolute; top: 3px; width: 12px; height: 12px;
+      border-radius: 50%; transition: .2s;
+    }
+
+    /* DROPZONE */
+    .dropzone {
+      border: 2px dashed #1a3a5a; border-radius: 12px;
+      padding: 36px 20px; text-align: center; cursor: pointer;
+      background: #090f18; transition: .2s;
+    }
+    .dropzone:active { border-color: var(--accent); background: #0a1828; }
+    .dropzone.loading { opacity: .7; pointer-events: none; }
+
+    /* SPINNER */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner {
+      width: 28px; height: 28px; border: 3px solid var(--border);
+      border-top-color: var(--accent); border-radius: 50%;
+      animation: spin .8s linear infinite; margin: 0 auto 12px;
+    }
+
+    /* BADGE */
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 10px; }
+
+    /* MISC */
+    .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .mt { margin-top: 12px; }
+    .text-accent { color: var(--accent); }
+    .text-green { color: var(--green); }
+    .text-orange { color: var(--orange); }
+    .text-dim { color: var(--text2); }
+    .text-sm { font-size: 11px; }
+    .fw5 { font-weight: 500; }
+
+    /* API KEY MODAL */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.7);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 100; padding: 20px;
+    }
+    .modal {
+      background: #0d1928; border: 1px solid #1a3a5a;
+      border-radius: 12px; padding: 24px; width: 100%; max-width: 400px;
+    }
+    .modal h2 { font-family: 'Cormorant Garamond', serif; color: var(--accent); font-size: 20px; margin-bottom: 12px; }
+    .modal p { font-size: 11px; color: var(--text2); line-height: 1.7; margin-bottom: 16px; }
+
+    /* EMPTY STATE */
+    .empty { text-align: center; padding: 48px 20px; color: #1e3a54; }
+    .empty .icon { font-size: 36px; margin-bottom: 12px; opacity: .4; }
+
+    /* SETTINGS ICON */
+    .settings-btn {
+      position: absolute; right: 16px; top: calc(var(--safe-top) + 14px);
+      background: none; border: none; color: #2a5070; font-size: 18px; cursor: pointer;
+      padding: 4px;
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+  <div class="header" style="position:relative;">
+    <h1>Coût de Revient Criée</h1>
+    <div class="sub">Les Sables-d'Olonne · Delanchy · Marie &amp; Donatien</div>
+    <div class="pills" id="header-pills"></div>
+    <button class="settings-btn" onclick="App.openSettings()" title="Clé API">⚙</button>
+  </div>
+
+  <div class="tabs" id="tabs"></div>
+  <div class="content" id="content"></div>
+</div>
+
+<!-- MODAL CLÉ API -->
+<div class="modal-overlay" id="modal-api" style="display:none;">
+  <div class="modal">
+    <h2>Clé API Anthropic</h2>
+    <p>
+      Pour l'import automatique des PDF, l'app a besoin d'une clé API Anthropic.<br><br>
+      Obtiens-la sur <strong style="color:var(--accent)">console.anthropic.com</strong> → API Keys → Create Key.<br><br>
+      La clé est stockée uniquement sur ton téléphone.
+    </p>
+    <input class="inp" id="api-key-input" type="password" placeholder="sk-ant-..." style="margin-bottom:12px;"/>
+    <div style="display:flex;gap:8px;">
+      <button class="btn-primary" onclick="App.saveApiKey()" style="flex:1;">Enregistrer</button>
+      <button class="btn-primary" onclick="App.closeSettings()" style="flex:1;color:#6898b8;border-color:#1a3a5a;">Annuler</button>
+    </div>
+    <div id="api-key-status" style="font-size:11px;color:#3a9868;margin-top:10px;text-align:center;"></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// DONNÉES
+// ═══════════════════════════════════════════════════
+const DELANCHY = {
+  fraisAdmin: 5.81,
+  tranches: [
+    { max: 40,       forfait: 47.62,  tonne: null      },
+    { max: 200,      forfait: null,   tonne: 1190.74   },
+    { max: 500,      forfait: null,   tonne: 1072.11   },
+    { max: 1000,     forfait: null,   tonne: 952.01    },
+    { max: Infinity, forfait: null,   tonne: 952.01    },
+  ]
+};
+
+const FRAIS_INIT = [
+  { id:"C610", nom:"Accès acheteur distant",  type:"pct_ht",  val:1.20,  on:true,  tva:20 },
+  { id:"C705", nom:"Taxe criée",              type:"pct_ht",  val:3.04,  on:true,  tva:0  },
+  { id:"C706", nom:"Livraison criée",         type:"eur_kg",  val:0.056, on:true,  tva:20 },
+  { id:"C718", nom:"Remise ACAAPP",           type:"pct_ht",  val:-0.10, on:true,  tva:20 },
+  { id:"C779", nom:"Achat distant",           type:"pct_ht",  val:0.30,  on:true,  tva:20 },
+  { id:"C801", nom:"Lavage bacs poissons",    type:"eur_bac", val:0.05,  on:true,  tva:0  },
+  { id:"C802", nom:"Lavage bacs céphalopodes",type:"eur_bac", val:0.11,  on:false, tva:0  },
+  { id:"H693", nom:"Redevance équip. LS",     type:"pct_ht",  val:1.47,  on:true,  tva:0  },
+  { id:"H600", nom:"Redevance équip. Yeu",    type:"pct_ht",  val:1.47,  on:false, tva:0  },
+  { id:"H853", nom:"Réversion ACAAPP",        type:"pct_ht",  val:0.10,  on:true,  tva:20 },
+  { id:"P176", nom:"Palettisation",           type:"fixe",    val:60.00, on:true,  tva:20 },
+];
+
+// ═══════════════════════════════════════════════════
+// ÉTAT
+// ═══════════════════════════════════════════════════
+const State = {
+  tab: 'import',
+  lignes: [],
+  frais: JSON.parse(JSON.stringify(FRAIS_INIT)),
+  majCarb: 19.29,
+  fraisSupp: 0,
+  impState: 'idle', // idle | loading | success | error
+  impMsg: '',
+  impMeta: null,
+  apiKey: localStorage.getItem('criee_api_key') || '',
+};
+
+// ═══════════════════════════════════════════════════
+// CALCULS
+// ═══════════════════════════════════════════════════
+function calcTransport(kg) {
+  const k = Math.max(kg, 30);
+  const t = DELANCHY.tranches.find(x => k <= x.max);
+  const base = t.forfait !== null ? t.forfait : (k / 1000) * t.tonne;
+  const maj = base * (1 + State.majCarb / 100);
+  return { base, maj, total: (maj + DELANCHY.fraisAdmin) * 1.20, tonne: t.tonne, isForfait: t.forfait !== null };
+}
+
+function calcLigne(l, totPoids, totAchat, transp) {
+  const po = parseFloat(l.poids) || 0;
+  const pr = parseFloat(l.prix)  || 0;
+  const ba = parseInt(l.bacs)    || 1;
+  const rP = totAchat > 0 ? pr / totAchat : 0;
+  const rK = totPoids > 0 ? po / totPoids : 0;
+  let criee = 0;
+  State.frais.forEach(f => {
+    if (!f.on) return;
+    const v = parseFloat(f.val) || 0;
+    const tv = f.tva > 0 ? 1 + f.tva / 100 : 1;
+    if      (f.type === 'pct_ht')  criee += pr * v / 100 * tv;
+    else if (f.type === 'eur_kg')  criee += po * v * tv;
+    else if (f.type === 'eur_bac') criee += ba * v * tv;
+    else if (f.type === 'fixe')    criee += rP * v * tv;
+  });
+  const trsp = transp.total * rK;
+  const spp  = rP * (parseFloat(State.fraisSupp) || 0);
+  const cout = pr + criee + trsp + spp;
+  return { po, pr, ba, criee, trsp, spp, cout,
+    revKg: po > 0 ? cout / po : 0,
+    acKg:  po > 0 ? pr  / po : 0,
+    sc:    pr > 0 ? (cout - pr) / pr * 100 : 0 };
+}
+
+function totals() {
+  const totPoids = State.lignes.reduce((s, l) => s + (parseFloat(l.poids) || 0), 0);
+  const totAchat = State.lignes.reduce((s, l) => s + (parseFloat(l.prix)  || 0), 0);
+  const transp   = calcTransport(totPoids);
+  const rows     = State.lignes.map(l => calcLigne(l, totPoids, totAchat, transp));
+  const grand    = rows.reduce((s, r) => ({ cout: s.cout + r.cout, criee: s.criee + r.criee, trsp: s.trsp + r.trsp }),
+                               { cout: 0, criee: 0, trsp: 0 });
+  return { totPoids, totAchat, transp, rows, grand };
+}
+
+// ═══════════════════════════════════════════════════
+// FORMAT
+// ═══════════════════════════════════════════════════
+const f2 = v => new Intl.NumberFormat('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v);
+const eur  = v => f2(v) + ' €';
+const eurKg= v => f2(v) + ' €/kg';
+const pct  = v => new Intl.NumberFormat('fr-FR',{minimumFractionDigits:1,maximumFractionDigits:1}).format(v) + ' %';
+
+function badgeStyle(p) {
+  if (p < 18) return 'background:rgba(80,210,130,.12);border:1px solid rgba(80,210,130,.3);color:#50d282';
+  if (p < 28) return 'background:rgba(255,190,50,.12);border:1px solid rgba(255,190,50,.3);color:#ffbe32';
+  return 'background:rgba(230,80,80,.12);border:1px solid rgba(230,80,80,.3);color:#e65050';
+}
+
+// ═══════════════════════════════════════════════════
+// PDF → BASE64
+// ═══════════════════════════════════════════════════
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = function() {
+      try {
+        const arr = new Uint8Array(reader.result);
+        let bin = '';
+        for (let i = 0; i < arr.length; i += 8192)
+          bin += String.fromCharCode.apply(null, arr.subarray(i, i + 8192));
+        resolve(btoa(bin));
+      } catch(e) { reject(e); }
+    };
+    reader.onerror = () => reject(new Error('Lecture impossible'));
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+// ═══════════════════════════════════════════════════
+// APPEL API CLAUDE
+// ═══════════════════════════════════════════════════
+async function extractFromPDF(b64) {
+  if (!State.apiKey) throw new Error('Clé API manquante — configure-la dans ⚙');
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': State.apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-beta': 'pdfs-2024-09-25',
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 3000,
+      messages: [{
+        role: 'user',
+        content: [
+          { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: b64 } },
+          { type: 'text', text: "Extrais toutes les lignes d'achat de produits de la mer de ce relevé de criée CDM Les Sables-d'Olonne. Pour chaque ligne produit: nom (lisible en français), poids (kg entier), prix (montant BRUT total en euros, dernière valeur avant le nom du bateau), bacs (nb colis). Réponds UNIQUEMENT avec ce JSON sans markdown: {\"date\":\"JJ/MM/AAAA\",\"numero_releve\":\"XXXXXX\",\"lignes\":[{\"nom\":\"Bar commun ligne\",\"poids\":30,\"prix\":41.73,\"bacs\":1}],\"total_brut\":1650.70}. Ignore totaux, frais, TVA, prestations." }
+        ]
+      }]
+    })
+  });
+  if (!res.ok) { const t = await res.text(); throw new Error('API ' + res.status + ': ' + t.slice(0,200)); }
+  const d = await res.json();
+  if (d.error) throw new Error(d.error.message);
+  const txt = (d.content || []).find(b => b.type === 'text')?.text || '';
+  const m = txt.match(/\{[\s\S]*\}/);
+  if (!m) throw new Error('Pas de JSON dans la réponse');
+  return JSON.parse(m[0]);
+}
+
+// ═══════════════════════════════════════════════════
+// APP
+// ═══════════════════════════════════════════════════
+const App = {
+  render() {
+    this.renderTabs();
+    this.renderHeader();
+    this.renderContent();
+  },
+
+  renderTabs() {
+    const tabs = [
+      ['import', '📄 PDF'],
+      ['saisie', '🐟 Achats' + (State.lignes.length ? ' (' + State.lignes.length + ')' : '')],
+      ['transport', '🚚 Transport'],
+      ['frais', '⚙ Frais'],
+      ['resultats', '📊 Résultats'],
+    ];
+    document.getElementById('tabs').innerHTML = tabs.map(([k, l]) =>
+      `<button class="tab-btn${State.tab===k?' active':''}" onclick="App.setTab('${k}')">${l}</button>`
+    ).join('');
+  },
+
+  renderHeader() {
+    if (!State.lignes.length) { document.getElementById('header-pills').innerHTML = ''; return; }
+    const { totPoids, totAchat, transp, grand } = totals();
+    const pills = [
+      ['Poids', totPoids.toFixed(1) + ' kg', '#3a88a0'],
+      ['Achat', eur(totAchat), '#3a9868'],
+      ['Transport', eur(transp.total), '#5dc8f5'],
+      ['Total', eur(grand.cout), '#c88030'],
+    ];
+    document.getElementById('header-pills').innerHTML = pills.map(([l, v, c]) =>
+      `<div class="pill"><div class="pill-label">${l}</div><div class="pill-value" style="color:${c}">${v}</div></div>`
+    ).join('');
+    if (State.impMeta) {
+      document.getElementById('header-pills').innerHTML +=
+        `<div class="pill"><div class="pill-label">Relevé importé</div><div class="pill-value text-accent" style="font-size:11px">${State.impMeta.date || ''} · N°${State.impMeta.num || ''}</div></div>`;
+    }
+  },
+
+  setTab(t) { State.tab = t; this.render(); },
+
+  renderContent() {
+    const el = document.getElementById('content');
+    if (State.tab === 'import')     el.innerHTML = this.viewImport();
+    if (State.tab === 'saisie')     el.innerHTML = this.viewSaisie();
+    if (State.tab === 'transport')  el.innerHTML = this.viewTransport();
+    if (State.tab === 'frais')      el.innerHTML = this.viewFrais();
+    if (State.tab === 'resultats')  el.innerHTML = this.viewResultats();
+    this.bindEvents();
+  },
+
+  // ─── IMPORT ───────────────────────────────────────
+  viewImport() {
+    let inner = '';
+    if (State.impState === 'idle') {
+      inner = `
+        <div style="font-size:32px;margin-bottom:10px;opacity:.4">📄</div>
+        <div style="font-size:15px;color:#4a88a8;font-family:'Cormorant Garamond',serif;font-weight:700;margin-bottom:6px">
+          Dépose ton relevé de criée
+        </div>
+        <div style="font-size:11px;color:#2a4a60;line-height:1.7">
+          Appuie pour sélectionner le PDF<br/>
+          CDM Les Sables-d'Olonne
+        </div>
+        ${!State.apiKey ? '<div style="margin-top:12px;font-size:10px;color:#c84040;background:#1a0808;padding:6px 12px;border-radius:6px;display:inline-block">⚠ Clé API manquante — configure-la dans ⚙</div>' : ''}
+      `;
+    } else if (State.impState === 'loading') {
+      inner = `<div class="spinner"></div><div style="font-size:13px;color:var(--accent)">${State.impMsg}</div>`;
+    } else if (State.impState === 'success') {
+      inner = `
+        <div style="font-size:28px;margin-bottom:8px">✅</div>
+        <div style="font-size:13px;color:#50d282;margin-bottom:6px">${State.impMsg}</div>
+        ${State.impMeta ? `<div style="font-size:11px;color:#3a7858">Relevé ${State.impMeta.date} · N° ${State.impMeta.num}<br>Total brut criée : ${eur(State.impMeta.tot||0)}</div>` : ''}
+        <div style="font-size:10px;color:#1e4060;margin-top:10px">Appuie pour importer un autre fichier</div>
+      `;
+    } else if (State.impState === 'error') {
+      inner = `
+        <div style="font-size:24px;margin-bottom:8px">⚠️</div>
+        <div style="font-size:11px;color:#c84040;background:#1a0808;border:1px solid #3a1010;border-radius:6px;padding:10px;margin-bottom:10px;text-align:left;word-break:break-word;line-height:1.6">${State.impMsg}</div>
+        <div style="font-size:10px;color:#2a4060">Appuie pour réessayer</div>
+      `;
+    }
+
+    return `
+      <div class="section-label">Import automatique du relevé de criée</div>
+      <div class="dropzone${State.impState==='loading'?' loading':''}" id="dropzone" onclick="App.triggerFileInput()">
+        <input type="file" id="pdf-input" accept="application/pdf,.pdf" style="display:none" onchange="App.handleFile(this.files[0])"/>
+        ${inner}
+      </div>
+      <div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        ${[['1. Sélectionne','Le PDF du relevé CDM'],['2. Analyse','L\'IA lit le document'],['3. Vérifie','Ajuste dans Achats'],['4. Résultats','Coûts de revient réels']].map(([t,d])=>`
+          <div class="card card-pad">
+            <div style="font-size:11px;color:var(--accent);margin-bottom:4px">${t}</div>
+            <div style="font-size:10px;color:#2a4a60;line-height:1.5">${d}</div>
+          </div>`).join('')}
+      </div>
+    `;
+  },
+
+  triggerFileInput() {
+    if (State.impState === 'loading') return;
+    document.getElementById('pdf-input')?.click();
+  },
+
+  async handleFile(file) {
+    if (!file) return;
+    if (file.type !== 'application/pdf' && !file.name.endsWith('.pdf')) {
+      State.impState = 'error'; State.impMsg = 'Fichier PDF requis.'; this.render(); return;
+    }
+    State.impState = 'loading'; State.impMsg = 'Lecture du fichier…'; this.render();
+    try {
+      const b64 = await fileToBase64(file);
+      State.impMsg = 'Analyse en cours (' + Math.round(b64.length / 1024) + ' Ko)…'; this.renderContent();
+      const result = await extractFromPDF(b64);
+      State.lignes = (result.lignes || []).map(l => ({
+        nom: String(l.nom || ''), poids: String(l.poids || ''),
+        prix: String(l.prix || ''), bacs: String(l.bacs || 1)
+      }));
+      State.impMeta = { date: result.date, num: result.numero_releve, tot: result.total_brut };
+      State.impState = 'success';
+      State.impMsg = State.lignes.length + ' lignes extraites avec succès';
+      setTimeout(() => { State.tab = 'resultats'; App.render(); }, 1200);
+    } catch(e) {
+      State.impState = 'error'; State.impMsg = String(e.message || e).slice(0, 500);
+    }
+    this.render();
+  },
+
+  // ─── SAISIE ───────────────────────────────────────
+  viewSaisie() {
+    const rows = State.lignes.map((l, i) => {
+      const acKg = (parseFloat(l.prix)||0) / (parseFloat(l.poids)||1);
+      return `<tr>
+        <td class="l" style="color:#1e3a54;font-size:11px;width:24px">${i+1}</td>
+        <td class="l"><input style="width:100%;min-width:120px;background:transparent;border:none;color:#b8ccd8;font-family:'DM Mono',monospace;font-size:12px;outline:none" value="${l.nom}" oninput="App.updLigne(${i},'nom',this.value)"/></td>
+        <td class="r"><input type="number" style="width:60px;text-align:right;background:transparent;border:none;color:#b8ccd8;font-family:'DM Mono',monospace;font-size:12px;outline:none" value="${l.poids}" oninput="App.updLigne(${i},'poids',this.value)"/></td>
+        <td class="r"><input type="number" style="width:72px;text-align:right;background:transparent;border:none;color:#b8ccd8;font-family:'DM Mono',monospace;font-size:12px;outline:none" value="${l.prix}" oninput="App.updLigne(${i},'prix',this.value)"/></td>
+        <td class="r"><input type="number" style="width:36px;text-align:right;background:transparent;border:none;color:#b8ccd8;font-family:'DM Mono',monospace;font-size:12px;outline:none" value="${l.bacs}" oninput="App.updLigne(${i},'bacs',this.value)"/></td>
+        <td class="r" style="color:#3a7888;font-size:11px">${f2(acKg)}</td>
+        <td><button class="btn-del" onclick="App.delLigne(${i})">×</button></td>
+      </tr>`;
+    }).join('');
+
+    return `
+      <div class="section-label">Lignes d'achat du jour</div>
+      ${State.lignes.length ? `
+        <div class="card" style="overflow:hidden;margin-bottom:10px">
+          <table class="tbl">
+            <thead><tr>
+              <th class="l">#</th><th class="l">Produit</th>
+              <th class="r">kg</th><th class="r">Prix €</th>
+              <th class="r">Bacs</th><th class="r">€/kg</th><th></th>
+            </tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>` : `<div class="empty"><div class="icon">🐟</div><div style="font-size:12px">Aucune ligne — importe un PDF ou ajoute manuellement</div></div>`}
+
+      <div class="card card-pad" style="border-style:dashed;margin-bottom:12px">
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+          <input class="inp" id="new-nom" placeholder="Produit" style="flex:2 1 140px"/>
+          <input class="inp" id="new-poids" type="number" placeholder="kg" style="flex:0 0 70px;text-align:right"/>
+          <input class="inp" id="new-prix" type="number" placeholder="€" style="flex:0 0 80px;text-align:right"/>
+          <input class="inp" id="new-bacs" type="number" placeholder="Bacs" style="flex:0 0 60px;text-align:right" value="1"/>
+          <button class="btn-primary" onclick="App.addLigne()">+ Ajouter</button>
+        </div>
+      </div>
+
+      <div class="card card-pad">
+        <div class="section-label" style="margin-bottom:8px">Frais divers supplémentaires</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <input class="inp" type="number" style="width:110px;text-align:right" value="${State.fraisSupp}" oninput="State.fraisSupp=this.value;App.renderHeader()" placeholder="0.00"/>
+          <span style="font-size:11px;color:#2a5070">€ TTC — carburant, péages…</span>
+        </div>
+      </div>
+    `;
+  },
+
+  updLigne(i, k, v) { State.lignes[i][k] = v; this.renderHeader(); },
+  delLigne(i) { State.lignes.splice(i, 1); this.render(); },
+  addLigne() {
+    const nom   = document.getElementById('new-nom')?.value || '';
+    const poids = document.getElementById('new-poids')?.value || '';
+    const prix  = document.getElementById('new-prix')?.value || '';
+    const bacs  = document.getElementById('new-bacs')?.value || '1';
+    if (!nom && !poids && !prix) return;
+    State.lignes.push({ nom, poids, prix, bacs });
+    this.render();
+  },
+
+  // ─── TRANSPORT ────────────────────────────────────
+  viewTransport() {
+    const { totPoids, transp } = totals();
+    const rows = [
+      { label:'≤ 40 kg (forfait)', max:40 },
+      { label:'41 – 200 kg',       max:200 },
+      { label:'201 – 500 kg',      max:500 },
+      { label:'501 – 1000 kg',     max:1000 },
+    ].map(t => {
+      const tr = DELANCHY.tranches.find(x => x.max === t.max);
+      const k  = Math.max(totPoids, 30);
+      const base = tr.forfait !== null ? tr.forfait : (k/1000)*tr.tonne;
+      const maj  = base * (1 + State.majCarb / 100);
+      const tot  = (maj + DELANCHY.fraisAdmin) * 1.20;
+      const cur  = (t.max===40&&k<=40)||(t.max===200&&k>40&&k<=200)||(t.max===500&&k>200&&k<=500)||(t.max===1000&&k>500&&k<=1000);
+      return `<tr style="${cur?'background:rgba(15,60,95,.2)':''}">
+        <td class="l" style="color:${cur?'var(--accent)':'#5a8898'}">${t.label}${cur?` <span style="font-size:9px;color:#1a6090">← vous</span>`:''}</td>
+        <td class="r" style="color:#3a6878;font-size:11px">${tr.forfait ? tr.forfait.toFixed(2)+' €' : tr.tonne+' €/t'}</td>
+        <td class="r" style="color:${cur?'#7ab8d0':'#2a5068'}">${eur(base)}</td>
+        <td class="r" style="color:${cur?'var(--accent)':'#2a5068'};font-weight:${cur?500:400}">${eur(tot)}</td>
+      </tr>`;
+    }).join('');
+
+    return `
+      <div class="section-label">Delanchy – Charentes 17 / Marée</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+        <div class="card card-pad">
+          <div style="font-size:9px;color:var(--text2);letter-spacing:.14em;text-transform:uppercase;margin-bottom:8px">Majoration carburant</div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <input class="inp" type="number" step="0.01" value="${State.majCarb}"
+              style="width:76px;text-align:right;font-size:18px"
+              oninput="State.majCarb=parseFloat(this.value)||0;App.renderHeader()"/>
+            <span style="color:#4a90b0;font-size:16px">%</span>
+          </div>
+          <div style="font-size:10px;color:#1e4060;margin-top:6px">Déc. 2025 : <span style="color:var(--accent)">19,29%</span><br>À mettre à jour chaque mois</div>
+        </div>
+        <div class="card card-pad">
+          <div style="font-size:9px;color:var(--text2);letter-spacing:.14em;text-transform:uppercase;margin-bottom:8px">Calcul du jour</div>
+          ${[['Poids',totPoids.toFixed(1)+' kg'],['Base HT',eur(transp.base)],['Après maj.',eur(transp.maj)],['+ Admin',eur(DELANCHY.fraisAdmin)],['Total TTC',eur(transp.total)]].map(([l,v])=>`
+            <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px">
+              <span style="color:#2a5070">${l}</span><span style="color:#7ab8d0">${v}</span>
+            </div>`).join('')}
+        </div>
+      </div>
+      <div class="section-label">Grille tarifaire (01/12/2025)</div>
+      <div class="card" style="overflow:hidden">
+        <table class="tbl">
+          <thead><tr>
+            <th class="l">Tranche</th><th class="r">Tarif</th><th class="r">Base HT</th><th class="r">Total TTC</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+      <div style="font-size:10px;color:#1e3a54;margin-top:8px;line-height:1.7">
+        Minimum perception : 30 kg · Frais admin : ${eur(DELANCHY.fraisAdmin)} / position · TVA 20%
+      </div>
+    `;
+  },
+
+  // ─── FRAIS CRIÉE ──────────────────────────────────
+  viewFrais() {
+    const rows = State.frais.map((f, i) => `
+      <tr style="opacity:${f.on?1:.4}">
+        <td>
+          <div class="toggle" style="background:${f.on?'#0f3a5a':'#141e2a'};border:1px solid ${f.on?'#1a7ab5':'#263040'}"
+            onclick="App.toggleFrais(${i})">
+            <div class="toggle-knob" style="left:${f.on?19:3}px;background:${f.on?'#5dc8f5':'#3a5570'}"></div>
+          </div>
+        </td>
+        <td class="l" style="font-size:10px;color:#2e5878">${f.id}</td>
+        <td class="l" style="color:#90b8c8;font-size:11px">${f.nom}</td>
+        <td class="r">
+          <input type="number" step="0.001" value="${f.val}"
+            style="width:66px;text-align:right;background:transparent;border:none;color:${f.val<0?'#d08040':'#90b8c8'};font-family:'DM Mono',monospace;font-size:11px;outline:none"
+            oninput="App.updFrais(${i},'val',parseFloat(this.value)||0)"/>
+          <span style="font-size:9px;color:#1e4060">${{pct_ht:'%',eur_kg:'€/kg',eur_bac:'€/bac',fixe:'€'}[f.type]}</span>
+        </td>
+        <td class="r" style="color:#1e4060;font-size:11px">${f.tva>0?f.tva+'%':'—'}</td>
+      </tr>`).join('');
+
+    return `
+      <div class="section-label">Frais de criée – Les Sables-d'Olonne</div>
+      <div class="card" style="overflow:hidden">
+        <table class="tbl">
+          <thead><tr>
+            <th style="width:44px"></th>
+            <th class="l">Code</th>
+            <th class="l">Désignation</th>
+            <th class="r">Valeur</th>
+            <th class="r">TVA</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    `;
+  },
+
+  toggleFrais(i) { State.frais[i].on = !State.frais[i].on; this.renderContent(); },
+  updFrais(i, k, v) { State.frais[i][k] = v; this.renderHeader(); },
+
+  // ─── RÉSULTATS ────────────────────────────────────
+  viewResultats() {
+    if (!State.lignes.length) return `
+      <div class="empty">
+        <div class="icon">📊</div>
+        <div style="font-size:12px;margin-bottom:16px">Aucune donnée — importe un PDF ou saisis des achats</div>
+        <button class="btn-primary" onclick="App.setTab('import')">Import PDF</button>
+      </div>`;
+
+    const { totPoids, totAchat, transp, rows, grand } = totals();
+    const totSc = totAchat > 0 ? (grand.cout - totAchat) / totAchat * 100 : 0;
+
+    const trows = rows.map(r => `
+      <tr>
+        <td class="l" style="color:#80b0c0;font-weight:500;max-width:130px;word-break:break-word;font-size:11px">${r.nom||'—'}</td>
+        <td class="r" style="color:#3a7080;font-size:11px">${r.po.toFixed(0)} kg</td>
+        <td class="r" style="color:#3a9868">${eur(r.pr)}</td>
+        <td class="r" style="color:#c07828;font-weight:500">${eur(r.cout)}</td>
+        <td class="r" style="color:#d08030;font-weight:500;font-size:13px">${eurKg(r.revKg)}</td>
+        <td class="r"><span class="badge" style="${badgeStyle(r.sc)}">${pct(r.sc)}</span></td>
+      </tr>`).join('');
+
+    return `
+      <div class="section-label">Coût de revient par produit</div>
+      <div class="card" style="overflow:hidden;margin-bottom:14px">
+        <table class="tbl">
+          <thead><tr>
+            <th class="l">Produit</th>
+            <th class="r">kg</th>
+            <th class="r">Achat</th>
+            <th class="r">Total</th>
+            <th class="r">€/kg rev.</th>
+            <th class="r">Surcoût</th>
+          </tr></thead>
+          <tbody>${trows}</tbody>
+          <tfoot><tr>
+            <td class="l" style="color:var(--accent);font-weight:500">TOTAL</td>
+            <td class="r" style="color:#3a7080">${totPoids.toFixed(0)} kg</td>
+            <td class="r" style="color:#3a9868;font-weight:500">${eur(totAchat)}</td>
+            <td class="r" style="color:#c07828;font-weight:500;font-size:14px">${eur(grand.cout)}</td>
+            <td class="r" style="color:#d08030;font-weight:500;font-size:14px">${eurKg(totPoids>0?grand.cout/totPoids:0)}</td>
+            <td class="r"><span class="badge" style="${badgeStyle(totSc)}">${pct(totSc)}</span></td>
+          </tr></tfoot>
+        </table>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+        ${[['Achat brut',totAchat,'#3a9868'],['Frais criée',grand.criee,'#4a88a8'],['Transport',grand.trsp,'#5dc8f5'],['Frais divers',parseFloat(State.fraisSupp)||0,'#9880c0']].map(([l,v,c])=>`
+          <div class="card card-pad">
+            <div style="font-size:9px;color:#1e3a54;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px">${l}</div>
+            <div style="font-size:16px;color:${c};font-weight:500">${eur(v)}</div>
+            <div style="font-size:10px;color:#1e3a54;margin-top:2px">${grand.cout>0?(v/grand.cout*100).toFixed(1)+'%':''}</div>
+          </div>`).join('')}
+      </div>
+
+      <div style="font-size:10px;color:#1e3a54;display:flex;gap:12px;flex-wrap:wrap">
+        <span>Surcoût :</span>
+        ${[[10,'< 18% ok'],[22,'18-28% attention'],[35,'> 28% élevé']].map(([p,l])=>{
+          const b = p<18?'#50d282':p<28?'#ffbe32':'#e65050';
+          return `<span style="display:inline-flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:2px;background:${b};display:inline-block"></span>${l}</span>`;
+        }).join('')}
+      </div>
+    `;
+  },
+
+  // ─── SETTINGS ─────────────────────────────────────
+  openSettings() {
+    document.getElementById('modal-api').style.display = 'flex';
+    document.getElementById('api-key-input').value = State.apiKey;
+    document.getElementById('api-key-status').textContent = State.apiKey ? '✓ Clé configurée' : '';
+  },
+  closeSettings() { document.getElementById('modal-api').style.display = 'none'; },
+  saveApiKey() {
+    const k = document.getElementById('api-key-input').value.trim();
+    State.apiKey = k;
+    localStorage.setItem('criee_api_key', k);
+    document.getElementById('api-key-status').textContent = k ? '✓ Clé enregistrée !' : 'Clé supprimée';
+    setTimeout(() => this.closeSettings(), 1000);
+    this.render();
+  },
+
+  bindEvents() {},
+};
+
+// ═══════════════════════════════════════════════════
+// SERVICE WORKER (offline)
+// ═══════════════════════════════════════════════════
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+
+// ═══════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════
+App.render();
+</script>
+</body>
+</html>
